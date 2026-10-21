@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kubo · Apertura de cuenta</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e1412;
+  --bg-dot:#1a2420;
+  --surface:#141c19;
+  --surface-2:#1b2521;
+  --line:#25332d;
+  --line-strong:#384a42;
+  --text:#e8f0ec;
+  --muted:#7d938a;
+  --mint:#2ee6a6;
+  --amber:#ffb547;
+  --danger:#ff5c6c;
+  --radius:8px;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background-color:var(--bg);
+  background-image:
+    radial-gradient(circle at center, var(--bg-dot) 1px, transparent 1px);
+  background-size:18px 18px;
+  color:var(--text);
+  font-family:'Inter',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  display:flex;justify-content:center;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit}
+:focus-visible{outline:2px solid var(--mint);outline-offset:3px}
+
+.app{width:100%;max-width:440px;min-height:100%;display:flex;flex-direction:column;padding:24px 20px 28px;position:relative}
+
+/* === Pantallas === */
+.screen{
+  display:flex;flex-direction:column;flex:1;
+  position:absolute;inset:0;padding:24px 20px 28px;
+  opacity:0;transform:translateY(12px);pointer-events:none;
+  transition:opacity .28s ease,transform .28s ease;
+}
+.screen.active{opacity:1;transform:none;pointer-events:auto;position:relative;padding:0}
+
+/* === Cabecera === */
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;min-height:34px;gap:12px}
+.brand{
+  display:flex;align-items:center;gap:10px;
+  font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1rem;
+  letter-spacing:.02em;text-transform:uppercase;
+}
+.brand .mark{
+  width:28px;height:28px;background:var(--surface);
+  border:2px solid var(--mint);position:relative;border-radius:4px;
+  transform:rotate(45deg);
+}
+.brand .mark::after{
+  content:"";position:absolute;inset:6px;background:var(--mint);border-radius:1px;
+}
+
+/* === Riel de pasos (horizontal con nodos) === */
+.steps{display:flex;align-items:center;gap:0}
+.steps b{
+  width:22px;height:22px;border-radius:50%;
+  border:1.5px solid var(--line-strong);
+  display:grid;place-items:center;
+  font-family:'JetBrains Mono',monospace;font-size:.62rem;
+  color:var(--muted);font-weight:600;
+  transition:all .25s;position:relative;
+}
+.steps b.on{border-color:var(--mint);color:var(--mint);background:rgba(46,230,166,.08)}
+.steps b + b::before{
+  content:"";position:absolute;left:-14px;top:50%;
+  width:12px;height:1px;background:var(--line-strong);
+}
+
+/* === Volver === */
+.back{
+  background:none;border:1.5px solid var(--line);
+  color:var(--muted);cursor:pointer;
+  padding:6px 12px;border-radius:6px;
+  font-size:.8rem;font-family:'JetBrains Mono',monospace;
+  transition:all .2s;
+}
+.back:hover{color:var(--mint);border-color:var(--mint)}
+
+/* === Tipografía === */
+h1{
+  font-size:1.85rem;line-height:1.15;font-weight:700;
+  letter-spacing:-.02em;
+}
+h1::before{
+  content:"";display:block;width:32px;height:3px;
+  background:var(--mint);margin-bottom:14px;border-radius:2px;
+}
+h2{font-size:1.4rem;line-height:1.2;font-weight:700;letter-spacing:-.01em}
+.lead{color:var(--muted);font-size:.92rem;line-height:1.6;margin-top:10px;max-width:36ch}
+
+/* === Hero === */
+.hero{flex:1;display:flex;flex-direction:column;justify-content:center;padding:10px 0 24px}
+
+/* Tarjeta rectangular con banda diagonal */
+.card-art{
+  height:160px;border-radius:var(--radius);margin-bottom:32px;position:relative;overflow:hidden;
+  background:var(--surface);
+  border:1.5px solid var(--line-strong);
+  padding:18px;display:flex;flex-direction:column;justify-content:space-between;
+}
+.card-art::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:4px;
+  background:linear-gradient(90deg,var(--mint),var(--amber));
+}
+.card-art::after{
+  content:"";position:absolute;top:-40%;right:-30%;
+  width:180px;height:180px;transform:rotate(-25deg);
+  background:linear-gradient(135deg,transparent 40%,rgba(46,230,166,.10) 40%,rgba(46,230,166,.10) 60%,transparent 60%);
+  pointer-events:none;
+}
+.card-art .chip{
+  width:36px;height:26px;border-radius:3px;
+  background:linear-gradient(135deg,var(--amber),#c4842a);
+  position:relative;
+}
+.card-art .chip::after{
+  content:"";position:absolute;inset:4px;
+  border:1px solid rgba(14,20,18,.4);border-radius:1px;
+}
+.card-art .num{
+  font-family:'JetBrains Mono',monospace;
+  font-size:.9rem;letter-spacing:.14em;color:var(--text);
+  font-variant-numeric:tabular-nums;
+}
+
+.perks{display:flex;gap:16px;margin-top:20px;color:var(--muted);font-size:.76rem;flex-wrap:wrap;font-family:'JetBrains Mono',monospace}
+.perks span::before{content:"▸ ";color:var(--mint)}
+
+/* === Botones rectangulares con acento lateral === */
+.btn{
+  width:100%;border:1.5px solid var(--line-strong);border-radius:var(--radius);
+  padding:15px 16px 15px 20px;font-weight:600;font-size:.94rem;
+  cursor:pointer;transition:all .18s;
+  position:relative;overflow:hidden;
+  -webkit-tap-highlight-color:transparent;
+  text-align:left;
+}
+.btn::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:4px;
+  background:var(--mint);transition:width .18s;
+}
+.btn:hover:not(:disabled)::before{width:8px}
+.btn:active{transform:translateY(1px)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{
+  background:var(--surface);color:var(--text);border-color:var(--mint);
+}
+.btn-primary::before{background:var(--mint)}
+.btn-ghost{
+  background:transparent;color:var(--muted);margin-top:10px;
+}
+.btn-ghost::before{background:var(--line-strong)}
+.btn-ghost:hover:not(:disabled){color:var(--text);border-color:var(--line-strong)}
+.btn-amber{
+  background:var(--surface);color:var(--text);border-color:var(--amber);
+}
+.btn-amber::before{background:var(--amber)}
+.actions{margin-top:auto;padding-top:22px}
+
+/* === Formulario estilo subrayado === */
+form{margin-top:22px;display:flex;flex-direction:column;gap:20px;flex:1}
+.field{position:relative;padding-top:18px}
+.field label{
+  position:absolute;top:0;left:0;
+  font-size:.72rem;color:var(--muted);font-weight:500;
+  letter-spacing:.06em;text-transform:uppercase;
+  font-family:'JetBrains Mono',monospace;
+  transition:color .2s;
+}
+.field input{
+  width:100%;background:transparent;
+  border:0;border-bottom:1.5px solid var(--line-strong);
+  border-radius:0;padding:8px 0;
+  color:var(--text);font:inherit;font-size:1rem;
+  transition:border-color .2s;
+}
+.field input:focus{border-bottom-color:var(--mint);outline:none}
+.field input:focus + label,.field input:not(:placeholder-shown) + label{color:var(--mint)}
+.field input::placeholder{color:var(--muted);opacity:.5}
+.field.bad input{border-bottom-color:var(--danger)}
+.field.bad label{color:var(--danger)}
+.err{display:none;color:var(--danger);font-size:.72rem;margin-top:6px}
+.field.bad .err{display:block}
+.secure{
+  display:flex;gap:10px;align-items:flex-start;font-size:.74rem;color:var(--muted);
+  line-height:1.55;background:var(--surface);
+  border:1px solid var(--line);border-left:3px solid var(--mint);
+  border-radius:4px;padding:12px 14px;
+}
+
+/* === Escaneo CUADRADO con esquinas recortadas === */
+.scan-wrap{display:flex;justify-content:center;margin:22px 0 18px}
+.frame{
+  position:relative;width:280px;height:280px;
+  background:var(--surface-2);
+  /* Esquinas recortadas en L */
+  clip-path:polygon(
+    22px 0, calc(100% - 22px) 0, 100% 22px, 100% calc(100% - 22px),
+    calc(100% - 22px) 100%, 22px 100%, 0 calc(100% - 22px), 0 22px
+  );
+  transition:filter .3s;
+}
+.frame.scanning{filter:drop-shadow(0 0 20px rgba(46,230,166,.4))}
+.frame.ok{filter:drop-shadow(0 0 24px rgba(46,230,166,.6))}
+.frame.warn{filter:drop-shadow(0 0 20px rgba(255,181,71,.4))}
+.frame video{
+  width:100%;height:100%;object-fit:cover;
+  transform:scaleX(-1);display:block;
+}
+.frame .fallback{
+  position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  text-align:center;padding:26px;color:var(--muted);font-size:.8rem;
+  line-height:1.55;background:var(--surface-2);
+}
+/* Esquinas L dibujadas encima */
+.corners{position:absolute;inset:0;pointer-events:none}
+.corners span{
+  position:absolute;width:24px;height:24px;
+  border:2.5px solid var(--line-strong);
+  transition:border-color .3s;
+}
+.corners span:nth-child(1){top:0;left:0;border-right:0;border-bottom:0;border-top-left-radius:6px}
+.corners span:nth-child(2){top:0;right:0;border-left:0;border-bottom:0;border-top-right-radius:6px}
+.corners span:nth-child(3){bottom:0;left:0;border-right:0;border-top:0;border-bottom-left-radius:6px}
+.corners span:nth-child(4){bottom:0;right:0;border-left:0;border-top:0;border-bottom-right-radius:6px}
+.frame.scanning .corners span,.frame.ok .corners span{border-color:var(--mint)}
+.frame.warn .corners span{border-color:var(--amber)}
+/* Rejilla de puntos de referencia */
+.refgrid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle, rgba(46,230,166,.35) 1px, transparent 1px);
+  background-size:24px 24px;
+  background-position:center;
+  opacity:.5;
+  mask-image:radial-gradient(circle at center, black 40%, transparent 75%);
+  -webkit-mask-image:radial-gradient(circle at center, black 40%, transparent 75%);
+}
+/* Línea de escaneo horizontal */
+.scanline{
+  position:absolute;left:0;right:0;height:2px;top:0;display:none;
+  background:linear-gradient(90deg,transparent,var(--mint),transparent);
+  box-shadow:0 0 14px var(--mint);
+  animation:sweep 1.5s ease-in-out infinite alternate;
+}
+.frame.scanning .scanline{display:block}
+@keyframes sweep{to{top:calc(100% - 2px)}}
+.tick{
+  position:absolute;inset:0;display:none;align-items:center;justify-content:center;
+  background:rgba(14,20,18,.6);
+  font-family:'JetBrains Mono',monospace;
+  font-size:3rem;color:var(--mint);font-weight:700;
+}
+.frame.ok .tick{display:flex}
+
+.hint{
+  text-align:center;font-size:.85rem;color:var(--muted);
+  min-height:2.6em;line-height:1.5;transition:color .3s;
+  font-family:'JetBrains Mono',monospace;
+}
+.bar{
+  height:4px;border-radius:2px;background:var(--surface-2);
+  overflow:hidden;margin:12px 0 4px;visibility:hidden;
+}
+.bar.show{visibility:visible}
+.bar i{display:block;height:100%;width:0;background:var(--mint);transition:width .12s linear}
+.pct{
+  text-align:center;font-size:.72rem;color:var(--muted);
+  min-height:1.2em;font-family:'JetBrains Mono',monospace;
+}
+
+/* === Éxito: sello ROMBO === */
+.done{flex:1;display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center;gap:4px}
+.seal{
+  width:80px;height:80px;margin-bottom:24px;
+  background:rgba(46,230,166,.10);
+  border:2px solid var(--mint);
+  transform:rotate(45deg);
+  display:flex;align-items:center;justify-content:center;
+  animation:pop .5s cubic-bezier(.2,1.4,.4,1);
+  border-radius:6px;
+}
+.seal svg{width:36px;height:36px;stroke:var(--mint);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;transform:rotate(-45deg);stroke-dasharray:50;stroke-dashoffset:50;animation:draw .5s .3s forwards}
+@keyframes pop{from{transform:rotate(45deg) scale(.4);opacity:0}}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+/* === Tarjeta 3D rectangular con banda === */
+.card3d{
+  width:100%;margin-top:24px;padding:20px;
+  border-radius:var(--radius);
+  background:var(--surface);
+  border:1.5px solid var(--line-strong);
+  box-shadow:0 16px 40px rgba(0,0,0,.4);
+  color:var(--text);text-align:left;position:relative;overflow:hidden;
+  font-variant-numeric:tabular-nums;
+}
+.card3d::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--mint) 0%,var(--mint) 60%,var(--amber) 60%,var(--amber) 100%);
+}
+.card3d::after{
+  content:"";position:absolute;bottom:-50px;right:-50px;
+  width:140px;height:140px;border-radius:50%;
+  background:radial-gradient(circle,rgba(46,230,166,.08),transparent 70%);
+  pointer-events:none;
+}
+.card3d .chip{
+  width:38px;height:26px;border-radius:3px;margin-bottom:16px;
+  background:linear-gradient(135deg,var(--amber),#c4842a);
+  position:relative;
+}
+.card3d .chip::after{content:"";position:absolute;inset:4px;border:1px solid rgba(14,20,18,.4);border-radius:1px}
+.card3d small{
+  display:block;color:var(--muted);font-size:.7rem;
+  letter-spacing:.08em;text-transform:uppercase;
+  font-family:'JetBrains Mono',monospace;
+}
+.card3d .num{
+  display:block;font-family:'JetBrains Mono',monospace;
+  font-size:1.05rem;letter-spacing:.12em;
+  margin:6px 0 18px;color:var(--text);
+}
+.card3d .saldo{
+  font-size:2rem;font-weight:700;letter-spacing:-.02em;
+  font-family:'JetBrains Mono',monospace;
+  color:var(--mint);
+}
+.card3d .owner{
+  font-size:.76rem;color:var(--muted);margin-top:6px;
+  text-transform:uppercase;letter-spacing:.1em;
+  font-family:'JetBrains Mono',monospace;
+}
+
+/* === Detalle cuenta === */
+.acct{
+  width:100%;margin-top:18px;text-align:left;
+  background:var(--surface);border:1px solid var(--line);
+  border-radius:var(--radius);padding:4px 16px;
+}
+.acct .row{
+  display:flex;justify-content:space-between;font-size:.84rem;
+  padding:12px 0;border-bottom:1px solid var(--line);
+}
+.acct .row:last-child{border-bottom:0}
+.acct .row span:first-child{color:var(--muted)}
+.acct .row span:last-child{font-family:'JetBrains Mono',monospace;font-size:.82rem}
+
+/* === Lista de cuentas === */
+.accounts-list{margin-top:16px;display:flex;flex-direction:column;gap:8px;max-height:240px;overflow-y:auto;padding-right:4px}
+.accounts-list::-webkit-scrollbar{width:5px}
+.accounts-list::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:3px}
+.account-item{
+  display:flex;align-items:center;gap:12px;
+  background:var(--surface);
+  border:1.5px solid var(--line);
+  border-left:4px solid var(--line-strong);
+  border-radius:var(--radius);
+  padding:12px 14px;
+  cursor:pointer;transition:all .18s;
+  text-align:left;width:100%;color:var(--text);
+}
+.account-item:hover,.account-item:focus{border-color:var(--mint);border-left-color:var(--mint);outline:none}
+.account-item[aria-selected="true"]{border-color:var(--mint);border-left-color:var(--mint);background:rgba(46,230,166,.05)}
+.account-item .avatar{
+  width:38px;height:38px;border-radius:4px;
+  background:var(--surface-2);
+  border:1.5px solid var(--mint);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'JetBrains Mono',monospace;font-weight:700;
+  color:var(--mint);flex-shrink:0;font-size:.85rem;
+  transform:rotate(45deg);
+}
+.account-item .avatar span{transform:rotate(-45deg)}
+.account-item .info{flex:1;min-width:0}
+.account-item .info strong{display:block;font-size:.87rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.account-item .info small{
+  display:block;font-size:.7rem;color:var(--muted);margin-top:3px;
+  letter-spacing:.06em;font-variant-numeric:tabular-nums;
+  font-family:'JetBrains Mono',monospace;
+}
+.account-item .chev{color:var(--muted);font-size:1.1rem;flex-shrink:0;font-family:'JetBrains Mono',monospace}
+.empty-state{
+  text-align:center;color:var(--muted);font-size:.82rem;
+  padding:28px 14px;background:var(--surface);
+  border:1.5px dashed var(--line-strong);
+  border-radius:var(--radius);line-height:1.6;
+}
+.masked{letter-spacing:.1em}
+.selected-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:10px;font-size:.72rem;
+  color:var(--mint);background:rgba(46,230,166,.08);
+  border:1px solid rgba(46,230,166,.3);
+  border-radius:4px;padding:6px 10px;
+  font-family:'JetBrains Mono',monospace;
+}
+.selected-badge::before{content:"●";font-size:.6rem}
+
+/* === Toast === */
+.toast{
+  position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);
+  background:var(--surface);color:var(--text);
+  border:1px solid var(--line-strong);border-left:3px solid var(--mint);
+  border-radius:4px;padding:12px 16px;font-size:.82rem;
+  box-shadow:0 12px 30px rgba(0,0,0,.5);opacity:0;pointer-events:none;
+  transition:opacity .3s,transform .3s;z-index:99;max-width:90vw;
+  font-family:'JetBrains Mono',monospace;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.toast.err{border-color:var(--danger);border-left-color:var(--danger);color:#ffc7cc}
+
+/* === Loader === */
+.loader{
+  position:fixed;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  background:var(--bg);z-index:200;gap:18px;transition:opacity .4s;
+}
+.loader.hide{opacity:0;pointer-events:none}
+.spinner{
+  width:40px;height:40px;
+  border:2px solid var(--line-strong);
+  border-top-color:var(--mint);
+  transform:rotate(45deg);
+  animation:spin 1.2s linear infinite;
+}
+@keyframes spin{to{transform:rotate(405deg)}}
+.loader p{color:var(--muted);font-size:.82rem;font-family:'JetBrains Mono',monospace}
+</style>
+</head>
+<body>
+
+<div class="loader" id="loader">
+  <div class="spinner"></div>
+  <p id="loaderMsg">Inicializando…</p>
+</div>
+
+<main class="app">
+
+  <!-- BIENVENIDA -->
+  <section class="screen active" id="s-welcome">
+    <div class="top"><div class="brand"><span class="mark"></span>Kubo</div></div>
+    <div class="hero">
+      <div class="card-art" aria-hidden="true">
+        <div class="chip"></div>
+        <div class="num">•••• •••• •••• 0427</div>
+      </div>
+      <h1>Tu cuenta, lista en tres minutos.</h1>
+      <p class="lead">Sin filas ni papeleo. Verificamos tu identidad con tu rostro desde el celular.</p>
+      <div class="perks"><span>Sin costo de apertura</span><span>Cuenta individual</span></div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" data-go="s-register">Abrir cuenta nueva</button>
+      <button class="btn btn-ghost" id="btnLogin">Iniciar sesión</button>
+    </div>
+  </section>
+
+  <!-- REGISTRO -->
+  <section class="screen" id="s-register">
+    <div class="top">
+      <button class="back" data-go="s-welcome" type="button">‹ Volver</button>
+      <div class="steps"><b class="on">1</b><b>2</b><b>3</b></div>
+    </div>
+    <h2>Cuéntanos quién eres</h2>
+    <p class="lead">Usa los datos exactos de tu documento de identidad.</p>
+    <form id="form" novalidate>
+      <div class="field">
+        <input id="nombres" autocomplete="name" placeholder=" " required>
+        <label for="nombres">Nombres y apellidos</label>
+        <div class="err">Escribe tu nombre completo (nombre y apellido).</div>
+      </div>
+      <div class="field">
+        <input id="cedula" inputmode="numeric" maxlength="13" placeholder=" " required>
+        <label for="cedula">Cédula o documento</label>
+        <div class="err">Ingresa entre 8 y 13 dígitos, solo números.</div>
+      </div>
+      <div class="field">
+        <input id="correo" type="email" autocomplete="email" placeholder=" " required>
+        <label for="correo">Correo electrónico</label>
+        <div class="err">Revisa el formato del correo.</div>
+      </div>
+      <div class="field">
+        <input id="telefono" type="tel" inputmode="tel" autocomplete="tel" placeholder=" " required>
+        <label for="telefono">Teléfono móvil</label>
+        <div class="err">Ingresa un teléfono de 9 a 12 dígitos.</div>
+      </div>
+      <div class="secure">🔒 <span>Tus datos viajan cifrados y solo se usan para abrir tu cuenta. Tu rostro se guarda como un código irreversible, nunca como imagen.</span></div>
+      <div class="actions">
+        <button class="btn btn-primary" type="submit" id="btnSubmitRegistro">Continuar →</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- VERIFICACIÓN FACIAL (registro) -->
+  <section class="screen" id="s-face">
+    <div class="top">
+      <button class="back" id="faceBack" type="button">‹ Volver</button>
+      <div class="steps"><b class="on">1</b><b class="on">2</b><b>3</b></div>
+    </div>
+    <h2>Verifica tu identidad</h2>
+    <p class="lead">Ubica tu rostro dentro del marco, con buena luz y sin lentes oscuros.</p>
+    <div class="scan-wrap">
+      <div class="frame" id="oval">
+        <video id="video" autoplay muted playsinline></video>
+        <div class="fallback" id="fallback">No pudimos usar la cámara. Revisa los permisos del navegador.</div>
+        <div class="refgrid"></div>
+        <div class="corners"><span></span><span></span><span></span><span></span></div>
+        <div class="scanline"></div>
+        <div class="tick">✓</div>
+      </div>
+    </div>
+    <div class="hint" id="hint" aria-live="polite">Activando cámara…</div>
+    <div class="bar" id="bar"><i id="barFill"></i></div>
+    <div class="pct" id="pct"></div>
+    <div class="actions"><button class="btn btn-amber" id="btnScan" disabled type="button">Escanear rostro</button></div>
+  </section>
+
+  <!-- ÉXITO -->
+  <section class="screen" id="s-done">
+    <div class="top">
+      <div class="brand"><span class="mark"></span>Kubo</div>
+      <div class="steps"><b class="on">1</b><b class="on">2</b><b class="on">3</b></div>
+    </div>
+    <div class="done">
+      <div class="seal"><svg viewBox="0 0 48 48"><path d="M10 25l9 9 19-20"/></svg></div>
+      <h2 id="doneTitle">¡Cuenta creada!</h2>
+      <p class="lead" style="text-align:center;margin-left:auto;margin-right:auto">Tu identidad fue verificada y tu cuenta individual ya está lista.</p>
+      <div class="card3d" id="doneCard">
+        <div class="chip"></div>
+        <small>Número de cuenta</small>
+        <span class="num" id="acctNum">—</span>
+        <small>Saldo inicial disponible</small>
+        <div class="saldo" id="doneSaldo">$0.00</div>
+      </div>
+      <div class="secure" style="margin-top:16px;text-align:left">💾 <span>Pulsa <strong>Guardar cuenta</strong> para registrarla en este dispositivo. Después podrás iniciar sesión con tu rostro.</span></div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-amber" id="btnSave" type="button">Guardar cuenta</button>
+      <button class="btn btn-primary" id="btnCopy" type="button" style="margin-top:10px">Copiar número</button>
+      <button class="btn btn-ghost" id="btnRestart" type="button">Ir al inicio</button>
+    </div>
+  </section>
+
+  <!-- LOGIN: seleccionar cuenta -->
+  <section class="screen" id="s-login">
+    <div class="top">
+      <button class="back" data-go="s-welcome" type="button">‹ Volver</button>
+      <div class="steps"><b class="on">1</b><b>2</b><b>3</b></div>
+    </div>
+    <h2>Inicia sesión</h2>
+    <p class="lead">Selecciona tu cuenta. Después verificaremos tu rostro.</p>
+    <div id="accountsContainer" style="margin-top:18px"></div>
+  </section>
+
+  <!-- LOGIN: verificación facial -->
+  <section class="screen" id="s-login-face">
+    <div class="top">
+      <button class="back" id="loginFaceBack" type="button">‹ Volver</button>
+      <div class="steps"><b class="on">1</b><b class="on">2</b><b>3</b></div>
+    </div>
+    <h2>Verificación facial</h2>
+    <p class="lead" id="loginFaceLead">Mira a la cámara y pulsa «Escanear rostro» para confirmar tu identidad.</p>
+    <div id="selectedAccountInfo"></div>
+    <div class="scan-wrap">
+      <div class="frame" id="ovalLogin">
+        <video id="videoLogin" autoplay muted playsinline></video>
+        <div class="fallback" id="fallbackLogin">No pudimos usar la cámara. Revisa los permisos del navegador.</div>
+        <div class="refgrid"></div>
+        <div class="corners"><span></span><span></span><span></span><span></span></div>
+        <div class="scanline"></div>
+        <div class="tick">✓</div>
+      </div>
+    </div>
+    <div class="hint" id="hintLogin" aria-live="polite">Activando cámara…</div>
+    <div class="bar" id="barLogin"><i id="barFillLogin"></i></div>
+    <div class="pct" id="pctLogin"></div>
+    <div class="actions"><button class="btn btn-amber" id="btnScanLogin" disabled type="button">Escanear rostro</button></div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section class="screen" id="s-dashboard">
+    <div class="top">
+      <div class="brand"><span class="mark"></span>Kubo</div>
+      <button class="back" id="btnLogout" type="button">Cerrar sesión</button>
+    </div>
+    <h2 id="dashHello">Hola de nuevo</h2>
+    <p class="lead">Este es tu saldo actualizado.</p>
+    <div class="card3d" id="dashCard">
+      <div class="chip"></div>
+      <small>Número de cuenta</small>
+      <span class="num" id="dashNum">—</span>
+      <small>Saldo disponible</small>
+      <div class="saldo" id="dashSaldo">$0.00</div>
+      <div class="owner" id="dashOwner">—</div>
+    </div>
+    <div class="acct">
+      <div class="row"><span>Estado</span><span id="dashEstado">activa</span></div>
+      <div class="row"><span>Tipo</span><span>Ahorro individual</span></div>
+      <div class="row"><span>Creada</span><span id="dashFecha">—</span></div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-ghost" id="btnCopy2" type="button">Copiar número de cuenta</button>
+    </div>
+  </section>
+
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  const screens = document.querySelectorAll('.screen');
+  let toastTimer;
+  function toast(msg, isErr){
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.toggle('err', !!isErr);
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 3200);
+  }
+  function buzz(p){ if (navigator.vibrate) try{ navigator.vibrate(p); }catch(e){} }
+
+  /* === Cámaras === */
+  const cams = {
+    register: { videoEl:$('video'), ovalEl:$('oval'), hintEl:$('hint'), barEl:$('bar'), fillEl:$('barFill'), pctEl:$('pct'), btnEl:$('btnScan'), fallbackEl:$('fallback'), stream:null, ok:false },
+    login:    { videoEl:$('videoLogin'), ovalEl:$('ovalLogin'), hintEl:$('hintLogin'), barEl:$('barLogin'), fillEl:$('barFillLogin'), pctEl:$('pctLogin'), btnEl:$('btnScanLogin'), fallbackEl:$('fallbackLogin'), stream:null, ok:false }
+  };
+
+  function camReset(c){
+    c.ovalEl.classList.remove('scanning','ok','warn');
+    c.barEl.classList.remove('show');
+    c.fillEl.style.width = '0%';
+    c.pctEl.textContent = '';
+    c.btnEl.textContent = 'Escanear rostro';
+    c.btnEl.disabled = false;
+  }
+  function camStop(c){
+    if (c.stream){ c.stream.getTracks().forEach(t => t.stop()); c.stream = null; }
+    c.videoEl.srcObject = null;
+    c.ok = false;
+  }
+  async function camStart(c){
+    camReset(c);
+    c.hintEl.textContent = 'Activando cámara…';
+    c.btnEl.disabled = true;
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw Object.assign(new Error('no-api'), { name:'NotSupportedError' });
+      }
+      c.stream = await navigator.mediaDevices.getUserMedia({
+        video:{ facingMode:'user', width:{ideal:720}, height:{ideal:960} }, audio:false
+      });
+      c.videoEl.srcObject = c.stream;
+      await c.videoEl.play();
+      c.ok = true;
+      c.fallbackEl.style.display = 'none';
+      c.hintEl.textContent = 'Centra tu rostro en el marco y pulsa «Escanear rostro».';
+      c.btnEl.textContent = 'Escanear rostro';
+    } catch (err){
+      c.ok = false;
+      c.fallbackEl.style.display = 'flex';
+      if (err && err.name === 'NotAllowedError')
+        c.hintEl.textContent = 'Permiso de cámara denegado.';
+      else if (err && err.name === 'NotFoundError')
+        c.hintEl.textContent = 'No se encontró ninguna cámara.';
+      else
+        c.hintEl.textContent = 'Cámara no disponible.';
+      c.btnEl.textContent = 'Reintentar cámara';
+    }
+    c.btnEl.disabled = false;
+  }
+  function stopAllCams(){ camStop(cams.register); camStop(cams.login); }
+
+  function go(id){
+    stopAllCams();
+    screens.forEach(s => s.classList.toggle('active', s.id === id));
+    window.scrollTo(0,0);
+    if (id === 's-face') camStart(cams.register);
+    if (id === 's-login') renderAccounts();
+    if (id === 's-login-face') camStart(cams.login);
+  }
+  document.querySelectorAll('[data-go]').forEach(b => b.addEventListener('click', () => go(b.dataset.go)));
+
+  /* === Persistencia === */
+  const KEY = 'kubo-cuentas-v1';
+  function loadCuentas(){
+    try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
+    catch(e){ return []; }
+  }
+  function saveCuentas(arr){ localStorage.setItem(KEY, JSON.stringify(arr)); }
+
+  const SESSION_KEY = 'kubo_session';
+  function saveSession(cuenta){
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify({ id: cuenta.id, exp: Date.now() + 1000*60*15 }));
+  }
+  function getActiveSession(){
+    try {
+      const s = JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null');
+      if (s && s.exp > Date.now()) return s;
+      sessionStorage.removeItem(SESSION_KEY);
+      return null;
+    } catch(e){ return null; }
+  }
+  function restoreSessionIfAny(){
+    const s = getActiveSession();
+    if (!s) return false;
+    const cuenta = loadCuentas().find(c => c.id === s.id);
+    if (cuenta){ showDashboard(cuenta); return true; }
+    return false;
+  }
+
+  /* === Descriptor facial === */
+  const WORK = 96;
+  const workCanvas = document.createElement('canvas');
+  workCanvas.width = WORK; workCanvas.height = WORK;
+  const workCtx = workCanvas.getContext('2d', { willReadFrequently:true });
+
+  function captureDescriptor(videoEl){
+    if (!videoEl.videoWidth) return null;
+    const vw = videoEl.videoWidth, vh = videoEl.videoHeight;
+    const side = Math.min(vw, vh) * 0.72;
+    const sx = (vw - side) / 2, sy = (vh - side) / 2;
+    workCtx.drawImage(videoEl, sx, sy, side, side, 0, 0, WORK, WORK);
+    const data = workCtx.getImageData(0, 0, WORK, WORK).data;
+
+    const gray = new Float32Array(WORK * WORK);
+    for (let i = 0; i < WORK*WORK; i++){
+      const idx = i * 4;
+      gray[i] = (0.299*data[idx] + 0.587*data[idx+1] + 0.114*data[idx+2]) / 255;
+    }
+
+    const bins = new Float32Array(8);
+    let magTotal = 0;
+    for (let y = 1; y < WORK-1; y++){
+      for (let x = 1; x < WORK-1; x++){
+        const i = y*WORK + x;
+        const gx = gray[i+1] - gray[i-1];
+        const gy = gray[i+WORK] - gray[i-WORK];
+        const mag = Math.sqrt(gx*gx + gy*gy);
+        if (mag < 0.02) continue;
+        let ang = Math.atan2(gy, gx);
+        if (ang < 0) ang += Math.PI;
+        const bin = Math.floor(ang / Math.PI * 8) % 8;
+        bins[bin] += mag;
+        magTotal += mag;
+      }
+    }
+    if (magTotal > 0) for (let i = 0; i < 8; i++) bins[i] /= magTotal;
+
+    const grid = new Float32Array(16);
+    const cell = WORK / 4;
+    let meanGlobal = 0;
+    for (let i = 0; i < WORK*WORK; i++) meanGlobal += gray[i];
+    meanGlobal /= (WORK*WORK);
+    for (let gy = 0; gy < 4; gy++){
+      for (let gx = 0; gx < 4; gx++){
+        let sum = 0, n = 0;
+        for (let y = 0; y < cell; y++){
+          for (let x = 0; x < cell; x++){
+            sum += gray[(gy*cell + y)*WORK + (gx*cell + x)];
+            n++;
+          }
+        }
+        grid[gy*4 + gx] = (sum / n) - meanGlobal;
+      }
+    }
+
+    const sym = new Float32Array(8);
+    for (let x = 0; x < 8; x++){
+      const xl = Math.floor((x + 0.5) * WORK / 8);
+      const xr = WORK - 1 - xl;
+      let diff = 0, n = 0;
+      for (let y = 0; y < WORK; y += 2){
+        diff += Math.abs(gray[y*WORK + xl] - gray[y*WORK + xr]);
+        n++;
+      }
+      sym[x] = n ? diff / n : 0;
+    }
+
+    const vec = new Array(8 + 16 + 8);
+    for (let i = 0; i < 8; i++) vec[i] = bins[i];
+    for (let i = 0; i < 16; i++) vec[8 + i] = grid[i];
+    for (let i = 0; i < 8; i++) vec[24 + i] = sym[i];
+    return vec;
+  }
+
+  async function captureSamples(videoEl, count, delayMs){
+    const samples = [];
+    for (let i = 0; i < count; i++){
+      const d = captureDescriptor(videoEl);
+      if (d) samples.push(d);
+      await new Promise(r => setTimeout(r, delayMs));
+    }
+    if (!samples.length) return null;
+    const med = new Array(samples[0].length).fill(0);
+    for (let k = 0; k < med.length; k++){
+      const vals = samples.map(s => s[k]).sort((a,b) => a-b);
+      med[k] = vals[Math.floor(vals.length/2)];
+    }
+    return med;
+  }
+
+  function cosineSim(a, b){
+    let dot = 0, na = 0, nb = 0;
+    for (let i = 0; i < a.length; i++){
+      dot += a[i]*b[i];
+      na += a[i]*a[i];
+      nb += b[i]*b[i];
+    }
+    if (!na || !nb) return 0;
+    return dot / (Math.sqrt(na) * Math.sqrt(nb));
+  }
+
+  const LOGIN_THRESHOLD = 0.86;
+
+  function matchAgainstSamples(descriptor, cuenta){
+    const samples = cuenta.biometriaSamples || (cuenta.biometria ? [cuenta.biometria] : []);
+    if (!samples.length) return { ok:false, best:0 };
+    let best = -Infinity;
+    for (const s of samples){
+      const sim = cosineSim(descriptor, s);
+      if (sim > best) best = sim;
+    }
+    return { ok: best >= LOGIN_THRESHOLD, best };
+  }
+
+  /* === Animación de escaneo === */
+  async function runScanAnimation(c, msgs){
+    c.btnEl.disabled = true;
+    c.ovalEl.classList.add('scanning');
+    c.barEl.classList.add('show');
+
+    let p = 0;
+    const bar = setInterval(() => {
+      p = Math.min(100, p + 3 + Math.random()*4);
+      c.fillEl.style.width = p + '%';
+      c.pctEl.textContent = Math.round(p) + '%';
+    }, 120);
+
+    c.hintEl.textContent = msgs[0] || 'Detectando rostro…';
+    await new Promise(r => setTimeout(r, 1300));
+    c.hintEl.textContent = msgs[1] || 'Mantén el rostro quieto…';
+    await new Promise(r => setTimeout(r, 1300));
+    c.hintEl.textContent = msgs[2] || 'Procesando rostro…';
+
+    const descriptor = await captureSamples(c.videoEl, 6, 200);
+
+    await new Promise(r => {
+      const iv = setInterval(() => {
+        p = Math.min(100, p + 8);
+        c.fillEl.style.width = p + '%';
+        c.pctEl.textContent = Math.round(p) + '%';
+        if (p >= 100){ clearInterval(iv); r(); }
+      }, 60);
+    });
+    clearInterval(bar);
+    return descriptor;
+  }
+
+  /* === REGISTRO === */
+  const rules = {
+    nombres:  v => v.trim().split(/\s+/).filter(Boolean).length >= 2 && v.trim().length >= 5,
+    cedula:   v => /^\d{8,13}$/.test(v),
+    correo:   v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v),
+    telefono: v => /^\+?\d{9,12}$/.test(v.replace(/[\s-]/g,''))
+  };
+  Object.keys(rules).forEach(k => $(k).addEventListener('input', () => $(k).parentElement.classList.remove('bad')));
+  $('cedula').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g,''));
+
+  let pendingUser = null;
+  let cuentaPendiente = null;
+  let enviandoRegistro = false;
+
+  $('form').addEventListener('submit', e => {
+    e.preventDefault();
+    if (enviandoRegistro) return;
+    let ok = true;
+    Object.keys(rules).forEach(k => {
+      const valid = rules[k]($(k).value);
+      $(k).parentElement.classList.toggle('bad', !valid);
+      if (!valid && ok) $(k).focus();
+      ok = ok && valid;
+    });
+    if (!ok) return;
+
+    enviandoRegistro = true;
+    const btn = $('btnSubmitRegistro');
+    btn.disabled = true;
+    btn.textContent = 'Verificando…';
+
+    pendingUser = {
+      nombres: $('nombres').value.trim(),
+      cedula: $('cedula').value,
+      correo: $('correo').value.trim(),
+      telefono: $('telefono').value.trim()
+    };
+
+    setTimeout(() => {
+      enviandoRegistro = false;
+      btn.disabled = false;
+      btn.textContent = 'Continuar →';
+      go('s-face');
+    }, 400);
+  });
+
+  $('faceBack').addEventListener('click', () => go('s-register'));
+
+  function genNumeroCuenta(){
+    const r = n => Array.from({length:n}, () => Math.floor(Math.random()*10)).join('');
+    return r(4) + ' ' + r(4) + ' ' + r(4);
+  }
+  function randomSaldo(){
+    const v = 50 + Math.random() * 4950;
+    return Math.round(v * 100) / 100;
+  }
+  function fmtMoney(n){
+    return n.toLocaleString('es-EC', { style:'currency', currency:'USD' });
+  }
+  function maskNum(n){
+    const digits = n.replace(/\s/g,'');
+    return '•••• •••• ' + digits.slice(-4);
+  }
+
+  $('btnScan').addEventListener('click', async () => {
+    const c = cams.register;
+    if (!c.ok){ camStart(c); return; }
+
+    const cuentas = loadCuentas();
+    if (cuentas.some(x => x.cedula === pendingUser.cedula)){
+      toast('Esta cédula ya tiene una cuenta. Inicia sesión.', true);
+      return;
+    }
+    if (cuentas.some(x => x.correo === pendingUser.correo)){
+      toast('Este correo ya tiene una cuenta. Inicia sesión.', true);
+      return;
+    }
+
+    const msgs = ['Detectando rostro…','Mantén el rostro quieto…','Capturando muestras…'];
+    const descriptor = await runScanAnimation(c, msgs);
+
+    if (!descriptor){
+      c.ovalEl.classList.remove('scanning');
+      c.ovalEl.classList.add('warn');
+      c.hintEl.textContent = 'No se pudo capturar tu rostro. Reintenta.';
+      c.btnEl.disabled = false;
+      return;
+    }
+
+    const extra = await captureSamples(c.videoEl, 6, 180);
+    const samples = [descriptor];
+    if (extra) samples.push(extra);
+
+    cuentaPendiente = {
+      id: 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+      ...pendingUser,
+      numeroCuenta: genNumeroCuenta(),
+      saldo: randomSaldo(),
+      estado: 'activa',
+      creadoEn: new Date().toISOString(),
+      biometriaSamples: samples
+    };
+
+    c.ovalEl.classList.remove('scanning');
+    c.ovalEl.classList.add('ok');
+    c.hintEl.textContent = 'Identidad verificada';
+    buzz([30, 40, 30]);
+
+    setTimeout(() => {
+      const first = cuentaPendiente.nombres.split(' ')[0];
+      $('doneTitle').textContent = '¡Bienvenido o bienvenida, ' + first + '!';
+      $('acctNum').textContent = cuentaPendiente.numeroCuenta;
+      animateMoney($('doneSaldo'), cuentaPendiente.saldo);
+      $('btnSave').disabled = false;
+      $('btnSave').textContent = 'Guardar cuenta';
+      go('s-done');
+    }, 800);
+  });
+
+  /* === Guardar cuenta === */
+  $('btnSave').addEventListener('click', () => {
+    if (!cuentaPendiente){ toast('No hay cuenta pendiente de guardar', true); return; }
+    const cuentas = loadCuentas();
+    if (cuentas.some(x => x.cedula === cuentaPendiente.cedula || x.correo === cuentaPendiente.correo)){
+      toast('Esta cuenta ya fue guardada', true);
+      return;
+    }
+    cuentas.push(cuentaPendiente);
+    saveCuentas(cuentas);
+    toast('✅ Cuenta guardada. Ya puedes iniciar sesión con tu rostro.');
+    $('btnSave').disabled = true;
+    $('btnSave').textContent = 'Cuenta guardada ✓';
+    buzz([50, 30, 50]);
+    cuentaPendiente = null;
+    pendingUser = null;
+    setTimeout(() => go('s-welcome'), 900);
+  });
+
+  /* === LOGIN === */
+  let loginTarget = null;
+
+  function renderAccounts(){
+    const cuentas = loadCuentas();
+    const cont = $('accountsContainer');
+    cont.innerHTML = '';
+
+    if (!cuentas.length){
+      const empty = document.createElement('div');
+      empty.className = 'empty-state';
+      empty.innerHTML = 'Aún no hay cuentas guardadas en este dispositivo.<br>Abre una cuenta nueva para empezar.';
+      cont.appendChild(empty);
+      return;
+    }
+
+    const title = document.createElement('p');
+    title.className = 'lead';
+    title.style.marginTop = '0';
+    title.style.fontSize = '.78rem';
+    title.textContent = 'Cuentas guardadas en este dispositivo:';
+    cont.appendChild(title);
+
+    const list = document.createElement('div');
+    list.className = 'accounts-list';
+    list.setAttribute('role', 'listbox');
+
+    cuentas.forEach(c => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'account-item';
+      btn.setAttribute('role', 'option');
+      btn.setAttribute('aria-selected', 'false');
+      btn.setAttribute('aria-label', 'Iniciar sesión como ' + c.nombres);
+
+      const initials = c.nombres.trim().split(/\s+/).slice(0,2).map(w => w[0].toUpperCase()).join('');
+      const avatar = document.createElement('div');
+      avatar.className = 'avatar';
+      const span = document.createElement('span');
+      span.textContent = initials || '?';
+      avatar.appendChild(span);
+
+      const info = document.createElement('div');
+      info.className = 'info';
+      const strong = document.createElement('strong');
+      strong.textContent = c.nombres;
+      const small = document.createElement('small');
+      small.className = 'masked';
+      small.textContent = maskNum(c.numeroCuenta);
+      info.appendChild(strong);
+      info.appendChild(small);
+
+      const chev = document.createElement('div');
+      chev.className = 'chev';
+      chev.textContent = '›';
+
+      btn.appendChild(avatar);
+      btn.appendChild(info);
+      btn.appendChild(chev);
+
+      btn.addEventListener('click', () => {
+        list.querySelectorAll('.account-item').forEach(el => el.setAttribute('aria-selected','false'));
+        btn.setAttribute('aria-selected','true');
+        loginTarget = c;
+        setTimeout(startLoginFace, 120);
+      });
+
+      list.appendChild(btn);
+    });
+
+    cont.appendChild(list);
+  }
+
+  $('btnLogin').addEventListener('click', () => go('s-login'));
+
+  function startLoginFace(){
+    if (!loginTarget) return;
+    $('loginFaceLead').textContent = 'Confirma tu identidad con reconocimiento facial.';
+    const info = $('selectedAccountInfo');
+    info.innerHTML = '';
+    const badge = document.createElement('div');
+    badge.className = 'selected-badge';
+    badge.textContent = loginTarget.nombres + ' · ' + maskNum(loginTarget.numeroCuenta);
+    info.appendChild(badge);
+    go('s-login-face');
+  }
+
+  $('loginFaceBack').addEventListener('click', () => {
+    loginTarget = null;
+    go('s-login');
+  });
+
+  $('btnScanLogin').addEventListener('click', async () => {
+    const c = cams.login;
+    if (!loginTarget){ toast('Selecciona una cuenta primero', true); go('s-login'); return; }
+    if (!c.ok){ camStart(c); return; }
+
+    const msgs = ['Detectando rostro…','Mantén el rostro quieto…','Comparando con tu registro…'];
+    const descriptor = await runScanAnimation(c, msgs);
+
+    if (!descriptor){
+      c.ovalEl.classList.remove('scanning');
+      c.ovalEl.classList.add('warn');
+      c.hintEl.textContent = 'No se pudo capturar tu rostro. Reintenta.';
+      c.btnEl.disabled = false;
+      return;
+    }
+
+    const { ok } = matchAgainstSamples(descriptor, loginTarget);
+
+    if (ok){
+      c.ovalEl.classList.remove('scanning');
+      c.ovalEl.classList.add('ok');
+      c.hintEl.textContent = 'Rostro verificado ✓';
+      buzz([20, 50, 20]);
+      saveSession(loginTarget);
+      const cuenta = loginTarget;
+      loginTarget = null;
+      setTimeout(() => showDashboard(cuenta), 800);
+    } else {
+      c.ovalEl.classList.remove('scanning');
+      c.ovalEl.classList.add('warn');
+      c.hintEl.textContent = 'Rostro no coincide. Intenta de nuevo.';
+      toast('Rostro no reconocido para esta cuenta', true);
+      buzz([60, 40, 60]);
+      c.btnEl.disabled = false;
+    }
+  });
+
+  /* === Dashboard === */
+  function showDashboard(cuenta){
+    const first = cuenta.nombres.split(' ')[0];
+    $('dashHello').textContent = 'Hola de nuevo, ' + first;
+    $('dashNum').textContent = cuenta.numeroCuenta;
+    $('dashOwner').textContent = cuenta.nombres;
+    $('dashEstado').textContent = cuenta.estado;
+    $('dashFecha').textContent = new Date(cuenta.creadoEn).toLocaleDateString('es-EC');
+    animateMoney($('dashSaldo'), cuenta.saldo);
+    go('s-dashboard');
+  }
+
+  function animateMoney(el, target){
+    const dur = 1200, start = performance.now();
+    function frame(t){
+      const k = Math.min(1, (t - start) / dur);
+      const eased = 1 - Math.pow(1 - k, 3);
+      el.textContent = fmtMoney(target * eased);
+      if (k < 1) requestAnimationFrame(frame);
+      else el.textContent = fmtMoney(target);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* === Acciones finales === */
+  async function copyNum(el){
+    const txt = el.textContent.replace(/\s/g,'');
+    try { await navigator.clipboard.writeText(txt); toast('Número copiado'); }
+    catch(e){ toast('No se pudo copiar', true); }
+  }
+  $('btnCopy').addEventListener('click', () => copyNum($('acctNum')));
+  $('btnCopy2').addEventListener('click', () => copyNum($('dashNum')));
+
+  $('btnRestart').addEventListener('click', () => {
+    $('form').reset();
+    pendingUser = null;
+    cuentaPendiente = null;
+    go('s-welcome');
+  });
+  $('btnLogout').addEventListener('click', () => {
+    sessionStorage.removeItem(SESSION_KEY);
+    loginTarget = null;
+    go('s-welcome');
+    toast('Sesión cerrada');
+  });
+
+  ['click','keydown','touchstart'].forEach(ev =>
+    document.addEventListener(ev, () => {
+      const s = getActiveSession();
+      if (s){
+        const cuenta = loadCuentas().find(c => c.id === s.id);
+        if (cuenta) saveSession(cuenta);
+      }
+    }, { passive:true })
+  );
+
+  /* === Arranque === */
+  $('loader').classList.add('hide');
+  restoreSessionIfAny();
+  window.addEventListener('pagehide', stopAllCams);
+})();
+</script>
+</body>
+</html>
